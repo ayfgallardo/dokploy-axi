@@ -1,0 +1,42 @@
+"pinned (branch != main)"[8]{name,branch}:
+  svc-charlie,feat/example-feature
+  svc-foxtrot,feat/example-feature
+  svc-india,feat/example-feature
+  app-bravo,feat/example-portal-refresh
+  app-delta,feat/example-portal-refresh
+  app-foxtrot,feat/example-portal-refresh
+  app-hotel,feat/example-portal-refresh
+  app-juliet,feat/example-portal-refresh
+services[23]{name,kind,status,branch,lastDeploymentId,lastDeploymentStatus,lastDeploymentAt}:
+  svc-alpha,compose,done,main,t9ogbuaCfgf335DyaHGPN,done,"2026-08-20T19:00:00.000Z"
+  svc-bravo,compose,done,main,MtbdRqWEP4kezzPYP1KWw,done,"2026-08-20T11:00:00.000Z"
+  svc-charlie,compose,done,feat/example-feature,cfqgSSnz7cVyg3HkIhlqJ,done,"2026-08-20T11:00:00.000Z"
+  svc-delta,compose,done,main,8dDd0txYbIll3lTDwH1oj,done,"2026-08-20T11:00:00.000Z"
+  svc-echo,compose,done,main,bnIdC5XX0HJo88YAgiZUc,done,"2026-08-20T11:00:00.000Z"
+  svc-foxtrot,compose,done,feat/example-feature,PZrwavyXQGKHV8fFqMNZW,done,"2026-08-20T11:00:00.000Z"
+  svc-golf,compose,done,main,Jm00UJGMJ2Jy3KtMPLJm9,done,"2026-08-20T11:00:00.000Z"
+  svc-hotel,compose,done,main,aJKLHlnLTUafrdAeu98Sw,done,"2026-08-20T11:00:00.000Z"
+  svc-india,compose,done,feat/example-feature,k7a7A331Aiu7lBcvfGW9n,done,"2026-08-20T11:00:00.000Z"
+  svc-juliet,compose,done,main,tUmahASCxPgG1ZinK8YLa,done,"2026-08-20T11:00:00.000Z"
+  svc-kilo,compose,done,main,JIyG68glpi6ResYc6OeDS,done,"2026-08-20T11:00:00.000Z"
+  svc-lima,compose,done,main,dtvcU6RUsKvmXzHFFvQ6d,done,"2026-08-20T11:00:00.000Z"
+  app-alpha,application,done,main,JOjzApFYBy1P7ZrhicTDe,done,"2026-08-20T11:00:00.000Z"
+  app-bravo,application,done,feat/example-portal-refresh,40BtNbcC0T0NrqOOW7mnc,done,"2026-08-20T11:00:00.000Z"
+  app-charlie,application,done,main,H8ZaVHN7075tGRYXILwey,done,"2026-08-20T11:00:00.000Z"
+  app-delta,application,done,feat/example-portal-refresh,AYjaXLIBhoMQb1RozB2uf,done,"2026-08-20T11:00:00.000Z"
+  app-echo,application,done,main,9U9n6om35cfkJgcv7iAf8,done,"2026-08-20T11:00:00.000Z"
+  app-foxtrot,application,done,feat/example-portal-refresh,9t09yyk84ZSVLTZLRVPi0,done,"2026-08-20T11:00:00.000Z"
+  app-golf,application,done,main,hYMzkkNHuPSBptEkU6rYJ,done,"2026-08-20T11:00:00.000Z"
+  app-hotel,application,done,feat/example-portal-refresh,bwat1P6fWsocPlQEC6uDM,done,"2026-08-20T11:00:00.000Z"
+  app-india,application,done,main,7oqpbG8CXxMZk4fG4k5b6,done,"2026-08-20T11:00:00.000Z"
+  app-juliet,application,done,feat/example-portal-refresh,x0PRHUX6kdwLBGh0EDlp8,done,"2026-08-20T11:00:00.000Z"
+  app-kilo,application,done,main,I0FXISQMQkj3mLzHTF3Nk,done,"2026-08-20T11:00:00.000Z"
+help[8]:
+  Run `dokploy-axi service unpin svc-charlie` to return to `main`
+  Run `dokploy-axi service unpin svc-foxtrot` to return to `main`
+  Run `dokploy-axi service unpin svc-india` to return to `main`
+  Run `dokploy-axi service unpin app-bravo` to return to `main`
+  Run `dokploy-axi service unpin app-delta` to return to `main`
+  Run `dokploy-axi service unpin app-foxtrot` to return to `main`
+  Run `dokploy-axi service unpin app-hotel` to return to `main`
+  Run `dokploy-axi service unpin app-juliet` to return to `main`

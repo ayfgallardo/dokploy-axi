@@ -1,0 +1,11 @@
+service:
+  name: svc-alpha
+  kind: compose
+  status: done
+  branch: main
+  watchPaths: "services/svc-alpha/**,common/**,uv.lock,pyproject.toml"
+  autoDeploy: true
+  domains: none
+  dockerServices: "migrate,web,worker,beat"
+  lastDeploymentId: t9ogbuaCfgf335DyaHGPN
+  lastDeploymentStatus: done

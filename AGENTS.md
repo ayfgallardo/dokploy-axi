@@ -5,3 +5,13 @@ This file is the project's committed home for project-intrinsic agent knowledge:
 - Add durable project-specific notes here as they are discovered through real work.
 
 See `README.md` for what this project is and how to use it.
+
+## Agent usage notes
+
+- Auth: `DOKPLOY_API_KEY` from the environment only — never accepted or written by `setup`, never logged. Server URL and project name live in `~/.config/dokploy-axi/config.json`, written by `dokploy-axi setup --url <url> --project <name>`; `DOKPLOY_URL` overrides the URL for a one-off server.
+- Resolve services by **name**, never by Dokploy's internal `appName` (random suffix) — this CLI never exposes it. `dokploy-axi service list` shows the names to use everywhere else.
+- `logs` returns **build/deployment logs only** — container runtime logs are WebSocket-only in Dokploy and out of scope. Don't expect application stdout/stderr there.
+- `env view` is read-only by design (`saveEnvironment` replaces the whole block and drops `SHARED_NETWORK`) — writes must go through the Dokploy UI.
+- `service deploy`/`redeploy --watch` waits for two spaced status reads to agree (Dokploy's `composeStatus` flickers through `done` before `running`) and always gives up after a timeout — a timeout doesn't mean failure, it means check `deployments`/`logs` manually.
+- `api <router.procedure>` refuses anything it classifies as a mutation without `--allow-mutation`; classification is name-based (a curated read-prefix list in `src/commands/api.ts`) and errs toward requiring the flag when unsure.
+- `pnpm build && pnpm test && pnpm lint` must all be green before considering a change done. `pnpm bench` reruns the token benchmark against the fixtures in `scripts/fixtures/`.

@@ -1,4 +1,11 @@
-import { mkdtempSync, readFileSync, rmSync, statSync } from "node:fs";
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -90,6 +97,32 @@ describe("setupCommand", () => {
     await expect(
       setupCommand(["--url", "https://dokploy.example.com"]),
     ).rejects.toMatchObject({ code: "VALIDATION_ERROR" });
+  });
+
+  it("distinguishes a corrupt existing config from no config, with no flags", async () => {
+    const dir = join(home.value, ".config", "dokploy-axi");
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(configPath(), "{ not json");
+
+    const error = await setupCommand([]).catch((e: unknown) => e);
+
+    expect(error).toMatchObject({ code: "VALIDATION_ERROR" });
+    expect((error as Error).message.toLowerCase()).toContain("unreadable");
+    expect((error as Error).message.toLowerCase()).not.toContain("absent");
+  });
+
+  it("explains a corrupt existing config on a partial update instead of asking for both flags blindly", async () => {
+    const dir = join(home.value, ".config", "dokploy-axi");
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(configPath(), "{ not json");
+
+    const error = await setupCommand(["--project", "other-project"]).catch(
+      (e: unknown) => e,
+    );
+
+    expect(error).toMatchObject({ code: "VALIDATION_ERROR" });
+    expect((error as Error).message.toLowerCase()).toContain("unreadable");
+    expect((error as Error).message.toLowerCase()).not.toContain("first-time");
   });
 
   it("keeps the existing field when only one flag is given on update", async () => {

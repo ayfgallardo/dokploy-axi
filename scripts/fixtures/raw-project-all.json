@@ -1,0 +1,165 @@
+[
+  {
+    "projectId": "lUIN9Zf922uK1eMVR6ROh",
+    "name": "example-project",
+    "description": "",
+    "createdAt": "2026-01-10T09:00:00.000Z",
+    "organizationId": "9job3aD55GcHxfr3bFVa2",
+    "env": "",
+    "environments": [
+      {
+        "name": "production",
+        "environmentId": "O7vRvKM4ao9eZYBpr2po7",
+        "isDefault": true,
+        "applications": [],
+        "mariadb": [],
+        "mongo": [],
+        "mysql": [],
+        "postgres": [],
+        "redis": [],
+        "compose": [],
+        "libsql": []
+      },
+      {
+        "name": "dev",
+        "environmentId": "Nw91uUAoDnIFfkdYXezPT",
+        "isDefault": false,
+        "applications": [
+          {
+            "applicationId": "yNsuZqn3DTZuoiUJVIYmK",
+            "name": "app-alpha",
+            "applicationStatus": "done"
+          },
+          {
+            "applicationId": "1wFbJFzmW2NonWra63mub",
+            "name": "app-bravo",
+            "applicationStatus": "done"
+          },
+          {
+            "applicationId": "vDzrVfuDaaDQjAQrDFVvf",
+            "name": "app-charlie",
+            "applicationStatus": "done"
+          },
+          {
+            "applicationId": "g45PwZMiAtsIFHfytCNdd",
+            "name": "app-delta",
+            "applicationStatus": "done"
+          },
+          {
+            "applicationId": "T2tVBigaHC8nXOMkqANkY",
+            "name": "app-echo",
+            "applicationStatus": "done"
+          },
+          {
+            "applicationId": "Knbs6KxDhCRQhzQUFUEtB",
+            "name": "app-foxtrot",
+            "applicationStatus": "done"
+          },
+          {
+            "applicationId": "RQD6L2TxH8JyTKOZrG5Pf",
+            "name": "app-golf",
+            "applicationStatus": "done"
+          },
+          {
+            "applicationId": "PSkB2dbCWzWQqeb294fgw",
+            "name": "app-hotel",
+            "applicationStatus": "done"
+          },
+          {
+            "applicationId": "2QS2iVKwQwGNP9Igr0dAX",
+            "name": "app-india",
+            "applicationStatus": "done"
+          },
+          {
+            "applicationId": "wvpGfx1mMxiWEukgnjmVZ",
+            "name": "app-juliet",
+            "applicationStatus": "done"
+          },
+          {
+            "applicationId": "3HKMuFIcY6zahLXtGA3Bh",
+            "name": "app-kilo",
+            "applicationStatus": "done"
+          }
+        ],
+        "mariadb": [],
+        "mongo": [],
+        "mysql": [],
+        "postgres": [
+          {
+            "postgresId": "eZOqlf22HdBJr4bg3bPw7"
+          }
+        ],
+        "redis": [
+          {
+            "redisId": "9fJwekMhB17PrKg8n6uKT"
+          }
+        ],
+        "compose": [
+          {
+            "composeId": "I0su7kZRlrE73GBNAZVF1",
+            "name": "svc-alpha",
+            "composeStatus": "done"
+          },
+          {
+            "composeId": "LvUPDqnvJY61ReQZbdrzH",
+            "name": "svc-bravo",
+            "composeStatus": "done"
+          },
+          {
+            "composeId": "iXixvc6muSYbytSl9cMEN",
+            "name": "svc-charlie",
+            "composeStatus": "done"
+          },
+          {
+            "composeId": "Ym7tBQQWymOmdxxeyudwz",
+            "name": "svc-delta",
+            "composeStatus": "done"
+          },
+          {
+            "composeId": "ecs8v6JwgypCY5l8pMOmf",
+            "name": "svc-echo",
+            "composeStatus": "done"
+          },
+          {
+            "composeId": "tw34SsQ3oTunkoTJcOK7O",
+            "name": "svc-foxtrot",
+            "composeStatus": "done"
+          },
+          {
+            "composeId": "N5CzeXccEdBDj3nOIHPBK",
+            "name": "svc-golf",
+            "composeStatus": "done"
+          },
+          {
+            "composeId": "Fl3Ezmt6BnWhfYayvYEYr",
+            "name": "svc-hotel",
+            "composeStatus": "done"
+          },
+          {
+            "composeId": "7Znh8B5RvTgWaEyZzdB8p",
+            "name": "svc-india",
+            "composeStatus": "done"
+          },
+          {
+            "composeId": "nBdDVCeCeOUjO88Ol10zO",
+            "name": "svc-juliet",
+            "composeStatus": "done"
+          },
+          {
+            "composeId": "laBlwm4BSDCeggNZB4DQn",
+            "name": "svc-kilo",
+            "composeStatus": "done"
+          },
+          {
+            "composeId": "Qz4kVVA84uxaGYEHPuylB",
+            "name": "svc-lima",
+            "composeStatus": "done"
+          }
+        ],
+        "libsql": []
+      }
+    ],
+    "projectTags": []
+  }
+]
+

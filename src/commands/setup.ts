@@ -13,11 +13,25 @@ import { renderHelp, renderOutput } from "../toon.js";
 const KEY_REMINDER =
   "DOKPLOY_API_KEY is read from the environment only — export it, this file never stores it";
 
-function currentConfig(): DokployConfig | undefined {
+type ConfigState =
+  | { kind: "missing" }
+  | { kind: "corrupt"; message: string }
+  | { kind: "ok"; config: DokployConfig };
+
+/** Distinguishes "no config yet" from "a config file exists but can't be read" — a
+ * partial update (one flag only) needs to explain which case it hit, not silently
+ * fall back to "first-time setup" wording when a file is actually there but broken. */
+function currentConfigState(): ConfigState {
   try {
-    return loadConfig();
-  } catch {
-    return undefined;
+    return { kind: "ok", config: loadConfig() };
+  } catch (error) {
+    if (error instanceof AxiError && error.code === "CONFIG_MISSING") {
+      return { kind: "missing" };
+    }
+    return {
+      kind: "corrupt",
+      message: error instanceof AxiError ? error.message : String(error),
+    };
   }
 }
 
@@ -38,9 +52,10 @@ export async function setupCommand(args: string[]): Promise<string> {
 
   const changesConfig = url !== undefined || project !== undefined;
 
+  const state = currentConfigState();
+
   if (!changesConfig) {
-    const existing = currentConfig();
-    if (!existing) {
+    if (state.kind === "missing") {
       return renderOutput([
         "config: absent",
         renderHelp([
@@ -48,24 +63,38 @@ export async function setupCommand(args: string[]): Promise<string> {
         ]),
       ]);
     }
+    if (state.kind === "corrupt") {
+      throw new AxiError(
+        `Existing config is unreadable: ${state.message}`,
+        "VALIDATION_ERROR",
+        ["Run `dokploy-axi setup --url <url> --project <name>` to rewrite it"],
+      );
+    }
     return renderOutput([
-      renderConfig("config", existing),
+      renderConfig("config", state.config),
       renderHelp([KEY_REMINDER]),
     ]);
   }
 
-  const existing = currentConfig();
+  const existing = state.kind === "ok" ? state.config : undefined;
   const resolvedUrl = url?.trim().replace(/\/+$/, "") || existing?.url;
   const resolvedProject = project?.trim() || existing?.projectName;
 
-  if (!resolvedUrl) {
-    throw new AxiError(
-      "--url is required for first-time setup",
-      "VALIDATION_ERROR",
-      ["Run `dokploy-axi setup --url <url> --project <name>`"],
-    );
-  }
-  if (!resolvedProject) {
+  if (!resolvedUrl || !resolvedProject) {
+    if (state.kind === "corrupt") {
+      throw new AxiError(
+        `Existing config is unreadable (${state.message}) — provide both --url and --project to rewrite it`,
+        "VALIDATION_ERROR",
+        ["Run `dokploy-axi setup --url <url> --project <name>`"],
+      );
+    }
+    if (!resolvedUrl) {
+      throw new AxiError(
+        "--url is required for first-time setup",
+        "VALIDATION_ERROR",
+        ["Run `dokploy-axi setup --url <url> --project <name>`"],
+      );
+    }
     throw new AxiError(
       "--project is required for first-time setup",
       "VALIDATION_ERROR",

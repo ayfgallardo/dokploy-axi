@@ -25,6 +25,7 @@
   ],
   "scripts": {
     "build": "tsc",
+    "bench": "tsx scripts/benchmark.ts",
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -39,6 +40,7 @@
     "@eslint/js": "^10.0.1",
     "@types/node": "^22.0.0",
     "eslint": "^10.1.0",
+    "gpt-tokenizer": "^4.0.0",
     "globals": "^17.4.0",
     "prettier": "^3.8.1",
     "tsx": "^4.0.0",

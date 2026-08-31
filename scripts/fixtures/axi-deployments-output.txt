@@ -1,0 +1,11 @@
+"deployments[svc-alpha]"[10]{id,title,commit,status,createdAt,finishedAt}:
+  t9ogbuaCfgf335DyaHGPN,Merge branch 'feat/webhook-retry' into 'main',f96e5256,done,"2026-08-20T19:00:00.000Z","2026-08-20T19:00:20.000Z"
+  vI0nX9emFUSbMakylNZRo,Merge branch 'chore/ci-cache' into 'main',fd7fee40,done,"2026-08-20T18:00:00.000Z","2026-08-20T18:00:20.000Z"
+  YxecGflD4PO2Do7srkoK6,Merge branch 'test/add-coverage' into 'main',cc97f89b,done,"2026-08-20T17:00:00.000Z","2026-08-20T17:00:20.000Z"
+  tJOrNRahMFr6iCe1ZWjOl,Merge branch 'refactor/split-module' into 'main',"01325167",done,"2026-08-20T16:00:00.000Z","2026-08-20T16:00:20.000Z"
+  Wi5qk9vWnjyC2aZOL7I3E,Merge branch 'fix/timezone-bug' into 'main',747c95ee,done,"2026-08-20T15:00:00.000Z","2026-08-20T15:00:20.000Z"
+  jL2YXOYxFwTY4WuH7gYqN,Merge branch 'feat/rate-limit' into 'main',811e2fcb,done,"2026-08-20T14:00:00.000Z","2026-08-20T14:00:20.000Z"
+  WWHoJagBTjiUi8k3pUoNY,Merge branch 'docs/update-readme' into 'main',"1959e924",done,"2026-08-20T13:00:00.000Z","2026-08-20T13:00:20.000Z"
+  fv00hAkBHCcMWn8w6TWoz,Merge branch 'chore/bump-deps' into 'main',7b9c463e,done,"2026-08-20T12:00:00.000Z","2026-08-20T12:00:20.000Z"
+  HzJp0XeTvTP0f2GQA7fMh,Merge branch 'fix/pagination-limit' into 'main',7ec77b30,done,"2026-08-20T11:00:00.000Z","2026-08-20T11:00:20.000Z"
+  hzIBQexVOVZOyBsQwZecw,Merge branch 'feat/add-export' into 'main',ede252c4,done,"2026-08-20T10:00:00.000Z","2026-08-20T10:00:20.000Z"
