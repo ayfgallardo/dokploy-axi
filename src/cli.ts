@@ -93,17 +93,6 @@ type CommandFn = (
   ctx: DokployContext | undefined,
 ) => Promise<string>;
 
-/** Placeholder until the command tasks land their handlers. */
-function notImplementedYet(name: string): CommandFn {
-  return async () => {
-    throw new AxiError(
-      `\`dokploy-axi ${name}\` is not implemented yet`,
-      "NOT_IMPLEMENTED",
-      ["Run `dokploy-axi --help` to see what already works"],
-    );
-  };
-}
-
 /** `resolveContext` only answers `undefined` for `setup` — every other command gets a real context. */
 function withContext(
   fn: (args: string[], ctx: DokployContext) => Promise<string>,
@@ -119,12 +108,13 @@ function withContext(
 function routed(
   command: string,
   subcommands: readonly string[],
-  handlers: Partial<Record<string, CommandFn>>,
+  handlers: Record<string, CommandFn>,
   extraHelp: string[] = [],
 ): CommandFn {
   return async (args, ctx) => {
     const subcommand = args[0];
-    if (subcommand === undefined || !subcommands.includes(subcommand)) {
+    const handler = subcommand === undefined ? undefined : handlers[subcommand];
+    if (handler === undefined) {
       throw new AxiError(
         subcommand === undefined
           ? `\`dokploy-axi ${command}\` needs a subcommand`
@@ -133,8 +123,6 @@ function routed(
         [`Valid subcommands: ${subcommands.join(", ")}`, ...extraHelp],
       );
     }
-    const handler =
-      handlers[subcommand] ?? notImplementedYet(`${command} ${subcommand}`);
     return handler(args.slice(1), ctx);
   };
 }
