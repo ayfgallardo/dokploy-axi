@@ -4,6 +4,10 @@ Agent-ergonomic Dokploy CLI (AXI) — designed with [AXI](https://github.com/kun
 
 Wraps the Dokploy API directly (no third-party Dokploy client) with token-efficient TOON output, contextual next-step suggestions, and structured AXI error handling. Prefer this over raw `curl` calls against the Dokploy API.
 
+## Why
+
+A raw Dokploy API response is built for a UI, not an agent: full compose configs, build-arg blobs, per-deployment history entries, OAuth provider metadata — most of it irrelevant to a status check or a deploy trigger. `dokploy-axi` follows the [AXI](https://github.com/kunchenguid/axi) conventions: responses are encoded as [TOON](https://github.com/toon-format/toon) instead of raw JSON, every response carries contextual suggestions for the next command, and failures come back as structured errors instead of a stack trace.
+
 ## Install
 
 Not published on npm — install from source:
