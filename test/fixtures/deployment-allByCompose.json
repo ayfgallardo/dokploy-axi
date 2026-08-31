@@ -1,0 +1,22 @@
+[
+  {
+    "deploymentId": "dep_api_2",
+    "title": "Merge branch 'feat/example-2' into 'main'\n\nfeat(api-example): second change",
+    "description": "Commit: cccccccccccccccccccccccccccccccccccccccc",
+    "status": "done",
+    "createdAt": "2026-08-27T12:00:00.000Z",
+    "startedAt": "2026-08-27T12:00:00.000Z",
+    "finishedAt": "2026-08-27T12:01:00.000Z",
+    "errorMessage": null
+  },
+  {
+    "deploymentId": "dep_api_1",
+    "title": "Merge branch 'feat/example-1' into 'main'\n\nfeat(api-example): first change",
+    "description": "Commit: dddddddddddddddddddddddddddddddddddddddd",
+    "status": "done",
+    "createdAt": "2026-08-26T09:00:00.000Z",
+    "startedAt": "2026-08-26T09:00:00.000Z",
+    "finishedAt": "2026-08-26T09:01:00.000Z",
+    "errorMessage": null
+  }
+]

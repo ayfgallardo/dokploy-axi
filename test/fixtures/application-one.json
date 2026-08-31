@@ -1,0 +1,36 @@
+{
+  "applicationId": "app_front_1",
+  "name": "front-example",
+  "appName": "example-project-front-example-j1k2l3",
+  "sourceType": "gitlab",
+  "gitlabBranch": "main",
+  "gitlabRepository": "front-example",
+  "gitlabOwner": "example-group",
+  "autoDeploy": true,
+  "triggerType": "push",
+  "watchPaths": ["apps/front-example/**"],
+  "applicationStatus": "done",
+  "environmentId": "env_dev",
+  "deployments": [
+    {
+      "deploymentId": "dep_front_older",
+      "title": "fix: older commit",
+      "description": "Commit: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "status": "done",
+      "createdAt": "2026-08-20T10:00:00.000Z",
+      "startedAt": "2026-08-20T10:00:00.000Z",
+      "finishedAt": "2026-08-20T10:01:00.000Z",
+      "errorMessage": null
+    },
+    {
+      "deploymentId": "dep_front_newest",
+      "title": "feat: newest commit",
+      "description": "Commit: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "status": "done",
+      "createdAt": "2026-08-27T10:00:00.000Z",
+      "startedAt": "2026-08-27T10:00:00.000Z",
+      "finishedAt": "2026-08-27T10:01:00.000Z",
+      "errorMessage": null
+    }
+  ]
+}
