@@ -16,6 +16,7 @@ type MainOptions = {
 };
 
 export const COMMAND_NAMES = [
+  "home",
   "service",
   "deployments",
   "logs",
@@ -39,8 +40,8 @@ export const SERVICE_SUBCOMMANDS = [
 export const ENV_SUBCOMMANDS = ["view"] as const;
 
 export const TOP_HELP = `usage: dokploy-axi [command] [args] [flags]
-commands[${COMMAND_NAMES.length + 1}]:
-  (none)=home, ${COMMAND_NAMES.join(", ")}
+commands[${COMMAND_NAMES.length}]:
+  ${COMMAND_NAMES.join(", ")} — no args runs home
 service[${SERVICE_SUBCOMMANDS.length}]:
   ${SERVICE_SUBCOMMANDS.join(", ")}
 env[${ENV_SUBCOMMANDS.length}]:
@@ -62,6 +63,7 @@ examples:
 `;
 
 const COMMAND_HELP: Record<string, string> = {
+  home: "usage: dokploy-axi home (same as `dokploy-axi` with no args)\n",
   service: `usage: dokploy-axi service <${SERVICE_SUBCOMMANDS.join("|")}> [NAME] [args]\n`,
   deployments: "usage: dokploy-axi deployments <NAME>\n",
   logs: "usage: dokploy-axi logs <NAME> [--deployment <ID>] [--tail <N>]\n",
@@ -106,7 +108,11 @@ function routed(
   };
 }
 
+const homeCommand = notImplementedYet("home");
+
 const COMMANDS: Record<string, CommandFn> = {
+  // `dokploy-axi home` and `dokploy-axi` are the same view.
+  home: homeCommand,
   service: routed("service", SERVICE_SUBCOMMANDS),
   deployments: notImplementedYet("deployments"),
   logs: notImplementedYet("logs"),
@@ -124,7 +130,7 @@ export async function main(options: MainOptions = {}): Promise<void> {
     version: VERSION,
     topLevelHelp: TOP_HELP,
     ...(options.stdout ? { stdout: options.stdout } : {}),
-    home: notImplementedYet("home"),
+    home: homeCommand,
     commands: COMMANDS,
     getCommandHelp: (command) => COMMAND_HELP[command],
     formatError: (error) => {

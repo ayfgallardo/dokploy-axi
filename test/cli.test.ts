@@ -32,6 +32,7 @@ async function run(argv: string[]): Promise<string> {
 describe("cli surface", () => {
   it("exposes exactly the planned commands", () => {
     expect([...COMMAND_NAMES]).toEqual([
+      "home",
       "service",
       "deployments",
       "logs",
@@ -79,12 +80,20 @@ describe("cli surface", () => {
   it("reports an unknown command", async () => {
     expect(await run(["nope"])).toMatch(/nope/);
   });
+
+  it("accepts `home` literally, like the no-args invocation", async () => {
+    const output = await run(["home"]);
+
+    expect(output).not.toContain("Unknown command");
+    expect(output).toMatch(/not implemented yet/);
+  });
 });
 
 describe("stubs", () => {
   it("answers every command with a clear not-implemented error", async () => {
     for (const argv of [
       [],
+      ["home"],
       ["service", "list"],
       ["deployments"],
       ["logs"],
