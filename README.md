@@ -38,8 +38,8 @@ This writes `~/.config/dokploy-axi/config.json` (server URL and project name onl
 | `dokploy-axi` / `dokploy-axi home`                                       | Dashboard: every service, its tracked branch, status and last deployment.      |
 | `dokploy-axi service list`                                               | All composes and applications with status, branch, autoDeploy.                 |
 | `dokploy-axi service view <NAME>`                                        | Detail: branch, watch paths, domains, docker services, last deployment.        |
-| `dokploy-axi service deploy <NAME> [--watch] [--timeout <SECONDS>]`      | Trigger a build/deploy. Mutation.                                              |
-| `dokploy-axi service redeploy <NAME> [--watch] [--timeout <SECONDS>]`    | Redeploy from the last build. Mutation.                                        |
+| `dokploy-axi service deploy <NAME> [--watch] [--timeout <SECONDS>]`      | Trigger a build/deploy. `--watch` polls until `done`/`error`/`idle`. Mutation. |
+| `dokploy-axi service redeploy <NAME> [--watch] [--timeout <SECONDS>]`    | Redeploy from the last build, same `--watch`. Mutation.                        |
 | `dokploy-axi service start <NAME>` / `stop <NAME>`                       | Start/stop a compose service (no application equivalent). Mutation.            |
 | `dokploy-axi service pin <NAME> <BRANCH>`                                | Track a feature branch instead of `main`. Mutation.                            |
 | `dokploy-axi service unpin <NAME>`                                       | Return to `main` (an alias for `pin <NAME> main`). Mutation.                   |
@@ -55,8 +55,8 @@ Run `dokploy-axi --help` or `dokploy-axi <command> --help` for exact flags.
 
 Behaviors that don't show up from the command names alone:
 
-1. **`composeStatus` flickers.** It passes through `done` for a few seconds before settling to `running` after a deploy — `--watch` only trusts a status once two spaced reads agree, and always gives up after an explicit timeout ("still running after Ns — check the VPS").
-2. **No zombie detection upstream.** An OOM'd build can stay `running` forever; every watch has that explicit timeout rather than polling indefinitely.
+1. **`composeStatus` flickers.** It passes through `done` for a few seconds around a deploy — and right after triggering one, the status still reads the _previous_ build's `done`. So `--watch` trusts a status only once two spaced reads agree, and accepts `done`/`idle` only after it has actually seen the service `running` (a confirmed `error` is reported immediately).
+2. **No zombie detection upstream.** An OOM'd build stays `running` forever, and `running` is never a terminal state for `--watch` — so every watch gives up after an explicit wall-clock timeout ("still running after Ns — check the VPS"). A timeout is not a failure verdict: check `deployments`/`logs`.
 3. **`compose.update` silently ignores `appName`.** `appName` carries a random suffix Dokploy assigns — this CLI never exposes or sends it, resolving services by name only. `pin`/`unpin` send `gitlabBranch` as the sole mutated field.
 4. **`logs` is build/deployment logs only.** Application runtime logs are WebSocket-only in Dokploy and out of scope for this CLI — the output labels itself as build logs so an agent doesn't mistake it for app output.
 5. **OpenAPI 500 triggers an automatic tRPC fallback.** A known Dokploy bug makes the OpenAPI facade 500 on payloads the tRPC engine serves fine (dokploy#3793); the transport retries via tRPC before surfacing an error.

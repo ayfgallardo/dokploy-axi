@@ -202,20 +202,24 @@ export interface WatchOptions {
   intervalMs?: number;
   timeoutMs?: number;
   sleep?: (ms: number) => Promise<void>;
+  now?: () => number;
 }
 
 const DEFAULT_INTERVAL_MS = 5_000;
 const DEFAULT_TIMEOUT_MS = 10 * 60 * 1_000;
+
+const TERMINAL_STATUSES = new Set(["done", "error", "idle"]);
 
 function defaultSleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /**
- * Traps 1+2: composeStatus flickers through `done` for a few seconds before
- * settling, and a zombie build never reports a terminal state on its own —
- * so this only trusts a status once two spaced reads agree, and always gives
- * up after an explicit (elapsed, not wall-clock) timeout.
+ * Traps 1+2: composeStatus flickers through `done` for a few seconds around a
+ * deploy, and a zombie build stays `running` forever. So a status is trusted
+ * only once two spaced reads agree, `running` is never terminal, and a
+ * `done`/`idle` only counts once the watch has actually seen the build run —
+ * otherwise the stale pre-build `done` would read as instant success.
  */
 export async function watchStatus(
   ctx: DokployContext,
@@ -225,17 +229,27 @@ export async function watchStatus(
   const intervalMs = options.intervalMs ?? DEFAULT_INTERVAL_MS;
   const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   const sleep = options.sleep ?? defaultSleep;
+  const now = options.now ?? Date.now;
 
+  const startedAt = now();
   let previous: string | undefined;
-  let elapsedMs = 0;
+  let sawRunning = false;
 
   for (;;) {
     const current = await fetchStatus(ctx, ref);
-    if (previous !== undefined && current === previous) {
+    sawRunning ||= current === "running";
+
+    const confirmed = current === previous;
+    if (
+      confirmed &&
+      TERMINAL_STATUSES.has(current) &&
+      (current === "error" || sawRunning)
+    ) {
       return current;
     }
     previous = current;
 
+    const elapsedMs = now() - startedAt;
     if (elapsedMs >= timeoutMs) {
       throw new AxiError(
         `\`${ref.name}\` still running after ${Math.round(elapsedMs / 1000)}s — check the VPS`,
@@ -247,7 +261,6 @@ export async function watchStatus(
     }
 
     await sleep(intervalMs);
-    elapsedMs += intervalMs;
   }
 }
 

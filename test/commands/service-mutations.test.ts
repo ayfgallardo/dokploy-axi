@@ -52,6 +52,17 @@ const APP_REF = {
 
 const instantSleep = async () => {};
 
+/** A clock that only advances when the watch sleeps — no real timers in tests. */
+function fakeClock() {
+  let elapsed = 0;
+  return {
+    sleep: async (ms: number) => {
+      elapsed += ms;
+    },
+    now: () => elapsed,
+  };
+}
+
 beforeEach(() => {
   dokployGetMock.mockReset();
   dokployPostMock.mockReset();
@@ -59,24 +70,42 @@ beforeEach(() => {
 });
 
 describe("watchStatus", () => {
-  it("stabilizes only on two consecutive spaced reads agreeing (trap 1: transient `done`)", async () => {
+  it("returns `done` once the build has run and two spaced reads agree (trap 1)", async () => {
     dokployGetMock
       .mockResolvedValueOnce({ composeStatus: "running" })
-      .mockResolvedValueOnce({ composeStatus: "done" })
       .mockResolvedValueOnce({ composeStatus: "running" })
-      .mockResolvedValueOnce({ composeStatus: "running" });
+      .mockResolvedValueOnce({ composeStatus: "done" })
+      .mockResolvedValueOnce({ composeStatus: "done" });
+    const clock = fakeClock();
 
     const result = await watchStatus(CTX, COMPOSE_REF, {
-      sleep: instantSleep,
+      ...clock,
       intervalMs: 10,
       timeoutMs: 10_000,
     });
 
-    expect(result).toBe("running");
+    expect(result).toBe("done");
     expect(dokployGetMock).toHaveBeenCalledTimes(4);
   });
 
-  it("throws an explicit timeout naming elapsed time and telling to check the VPS", async () => {
+  it("never treats `running` as terminal: a stuck build times out (trap 2)", async () => {
+    dokployGetMock.mockResolvedValue({ composeStatus: "running" });
+    const clock = fakeClock();
+
+    await expect(
+      watchStatus(CTX, COMPOSE_REF, {
+        ...clock,
+        intervalMs: 1_000,
+        timeoutMs: 3_000,
+      }),
+    ).rejects.toMatchObject({
+      code: "API_ERROR",
+      message: expect.stringContaining("still running after 3s"),
+    });
+    expect(dokployGetMock.mock.calls.length).toBeGreaterThan(2);
+  });
+
+  it("names the elapsed time and tells to check the VPS", async () => {
     dokployGetMock.mockResolvedValue({ composeStatus: "running" });
 
     await expect(
@@ -86,18 +115,66 @@ describe("watchStatus", () => {
         timeoutMs: 0,
       }),
     ).rejects.toMatchObject({
-      code: "API_ERROR",
-      message: expect.stringContaining("still running after 0s"),
-    });
-    await expect(
-      watchStatus(CTX, COMPOSE_REF, {
-        sleep: instantSleep,
-        intervalMs: 1000,
-        timeoutMs: 0,
-      }),
-    ).rejects.toMatchObject({
       message: expect.stringContaining("check the VPS"),
     });
+  });
+
+  it("does not mistake a stale pre-build `done` for success (trap 1, symmetric edge)", async () => {
+    dokployGetMock.mockResolvedValue({ composeStatus: "done" });
+    const clock = fakeClock();
+
+    await expect(
+      watchStatus(CTX, COMPOSE_REF, {
+        ...clock,
+        intervalMs: 1_000,
+        timeoutMs: 3_000,
+      }),
+    ).rejects.toMatchObject({ code: "API_ERROR" });
+  });
+
+  it("reports a confirmed `error` reached mid-watch", async () => {
+    dokployGetMock
+      .mockResolvedValueOnce({ composeStatus: "running" })
+      .mockResolvedValueOnce({ composeStatus: "running" })
+      .mockResolvedValueOnce({ composeStatus: "error" })
+      .mockResolvedValueOnce({ composeStatus: "error" });
+    const clock = fakeClock();
+
+    const result = await watchStatus(CTX, COMPOSE_REF, {
+      ...clock,
+      intervalMs: 10,
+      timeoutMs: 10_000,
+    });
+
+    expect(result).toBe("error");
+  });
+
+  it("reports a confirmed `error` even without a prior `running` read", async () => {
+    dokployGetMock.mockResolvedValue({ composeStatus: "error" });
+    const clock = fakeClock();
+
+    const result = await watchStatus(CTX, COMPOSE_REF, {
+      ...clock,
+      intervalMs: 10,
+      timeoutMs: 10_000,
+    });
+
+    expect(result).toBe("error");
+  });
+
+  it("propagates a status read failure instead of swallowing it", async () => {
+    dokployGetMock
+      .mockResolvedValueOnce({ composeStatus: "running" })
+      .mockRejectedValueOnce(new Error("boom"));
+    const clock = fakeClock();
+
+    await expect(
+      watchStatus(CTX, COMPOSE_REF, {
+        ...clock,
+        intervalMs: 10,
+        timeoutMs: 10_000,
+      }),
+    ).rejects.toThrow("boom");
   });
 });
 
@@ -124,31 +201,34 @@ describe("serviceDeployCommand", () => {
     });
   });
 
-  it("polls with stabilization and reports the settled status with --watch", async () => {
+  it("polls past the stale `done` and reports the settled status with --watch", async () => {
     resolveServiceMock.mockResolvedValue(COMPOSE_REF);
     dokployGetMock
       .mockResolvedValueOnce({ composeStatus: "done" })
       .mockResolvedValueOnce({ composeStatus: "running" })
-      .mockResolvedValueOnce({ composeStatus: "running" });
+      .mockResolvedValueOnce({ composeStatus: "running" })
+      .mockResolvedValueOnce({ composeStatus: "done" })
+      .mockResolvedValueOnce({ composeStatus: "done" });
+    const clock = fakeClock();
 
     const output = await serviceDeployCommand(["api-example", "--watch"], CTX, {
-      sleep: instantSleep,
+      ...clock,
       intervalMs: 10,
       timeoutMs: 10_000,
     });
 
-    expect(output).toContain("running");
+    expect(output).toContain("done");
   });
 
   it("propagates the watch timeout as an error", async () => {
     resolveServiceMock.mockResolvedValue(COMPOSE_REF);
-    dokployGetMock
-      .mockResolvedValueOnce({ composeStatus: "running" })
-      .mockResolvedValueOnce({ composeStatus: "done" });
+    dokployGetMock.mockResolvedValue({ composeStatus: "running" });
+    const clock = fakeClock();
 
     await expect(
       serviceDeployCommand(["api-example", "--watch", "--timeout", "1"], CTX, {
-        sleep: instantSleep,
+        ...clock,
+        intervalMs: 500,
       }),
     ).rejects.toMatchObject({ code: "API_ERROR" });
   });
