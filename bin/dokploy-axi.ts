@@ -1,3 +1,8 @@
 #!/usr/bin/env node
-console.log("dokploy-axi 0.1.0");
-process.exit(0);
+import { tryFastPath } from "axi-sdk-js/fast-path";
+import { VERSION } from "../src/version.js";
+
+if (!tryFastPath(process.argv.slice(2), { version: VERSION })) {
+  const { main } = await import("../src/cli.js");
+  await main();
+}
