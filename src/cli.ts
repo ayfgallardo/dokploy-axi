@@ -1,5 +1,10 @@
 import { encode } from "@toon-format/toon";
 import { runAxiCli } from "axi-sdk-js";
+import { deploymentsCommand } from "./commands/deployments.js";
+import { envViewCommand } from "./commands/env.js";
+import { homeCommand } from "./commands/home.js";
+import { logsCommand } from "./commands/logs.js";
+import { serviceListCommand, serviceViewCommand } from "./commands/service.js";
 import type { DokployContext } from "./config.js";
 import { resolveContext } from "./config.js";
 import { AxiError, exitCodeForError } from "./errors.js";
@@ -88,9 +93,22 @@ function notImplementedYet(name: string): CommandFn {
   };
 }
 
+/** `resolveContext` only answers `undefined` for `setup` — every other command gets a real context. */
+function withContext(
+  fn: (args: string[], ctx: DokployContext) => Promise<string>,
+): CommandFn {
+  return async (args, ctx) => {
+    if (!ctx) {
+      throw new AxiError("Internal error: missing Dokploy context", "UNKNOWN");
+    }
+    return fn(args, ctx);
+  };
+}
+
 function routed(
   command: string,
   subcommands: readonly string[],
+  handlers: Partial<Record<string, CommandFn>>,
   extraHelp: string[] = [],
 ): CommandFn {
   return async (args, ctx) => {
@@ -104,19 +122,24 @@ function routed(
         [`Valid subcommands: ${subcommands.join(", ")}`, ...extraHelp],
       );
     }
-    return notImplementedYet(`${command} ${subcommand}`)(args.slice(1), ctx);
+    const handler =
+      handlers[subcommand] ?? notImplementedYet(`${command} ${subcommand}`);
+    return handler(args.slice(1), ctx);
   };
 }
 
-const homeCommand = notImplementedYet("home");
+const wrappedHome = withContext(homeCommand);
 
 const COMMANDS: Record<string, CommandFn> = {
   // `dokploy-axi home` and `dokploy-axi` are the same view.
-  home: homeCommand,
-  service: routed("service", SERVICE_SUBCOMMANDS),
-  deployments: notImplementedYet("deployments"),
-  logs: notImplementedYet("logs"),
-  env: routed("env", ENV_SUBCOMMANDS, [
+  home: wrappedHome,
+  service: routed("service", SERVICE_SUBCOMMANDS, {
+    list: withContext(serviceListCommand),
+    view: withContext(serviceViewCommand),
+  }),
+  deployments: withContext(deploymentsCommand),
+  logs: withContext(logsCommand),
+  env: routed("env", ENV_SUBCOMMANDS, { view: withContext(envViewCommand) }, [
     "`env` is read-only: change variables in the Dokploy UI — saveEnvironment replaces the whole block and drops SHARED_NETWORK",
   ]),
   api: notImplementedYet("api"),
@@ -130,7 +153,7 @@ export async function main(options: MainOptions = {}): Promise<void> {
     version: VERSION,
     topLevelHelp: TOP_HELP,
     ...(options.stdout ? { stdout: options.stdout } : {}),
-    home: homeCommand,
+    home: wrappedHome,
     commands: COMMANDS,
     getCommandHelp: (command) => COMMAND_HELP[command],
     formatError: (error) => {
