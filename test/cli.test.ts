@@ -44,6 +44,14 @@ vi.mock("../src/commands/env.js", () => ({
   envViewCommand: envViewCommandMock,
 }));
 
+const apiCommandMock = vi.fn(async () => "api-ok");
+vi.mock("../src/commands/api.js", () => ({ apiCommand: apiCommandMock }));
+
+const setupCommandMock = vi.fn(async () => "setup-ok");
+vi.mock("../src/commands/setup.js", () => ({
+  setupCommand: setupCommandMock,
+}));
+
 const { COMMAND_NAMES, ENV_SUBCOMMANDS, SERVICE_SUBCOMMANDS, TOP_HELP, main } =
   await import("../src/cli.js");
 
@@ -151,20 +159,16 @@ describe("cli surface", () => {
     );
     expect(await run(["logs", "api-example"])).toContain("logs-ok");
     expect(await run(["env", "view", "api-example"])).toContain("env-view-ok");
+    expect(await run(["api", "project.all"])).toContain("api-ok");
+    expect(await run(["setup"])).toContain("setup-ok");
 
     expect(serviceListCommandMock).toHaveBeenCalledTimes(1);
     expect(serviceViewCommandMock).toHaveBeenCalledTimes(1);
     expect(deploymentsCommandMock).toHaveBeenCalledTimes(1);
     expect(logsCommandMock).toHaveBeenCalledTimes(1);
     expect(envViewCommandMock).toHaveBeenCalledTimes(1);
-  });
-});
-
-describe("stubs", () => {
-  it("answers every mutation and unimplemented command with a clear not-implemented error", async () => {
-    for (const argv of [["api", "project.all"], ["setup"]]) {
-      expect(await run(argv)).toMatch(/not implemented yet/);
-    }
+    expect(apiCommandMock).toHaveBeenCalledTimes(1);
+    expect(setupCommandMock).toHaveBeenCalledTimes(1);
   });
 });
 

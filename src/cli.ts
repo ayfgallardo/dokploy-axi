@@ -1,5 +1,6 @@
 import { encode } from "@toon-format/toon";
 import { runAxiCli } from "axi-sdk-js";
+import { apiCommand } from "./commands/api.js";
 import { deploymentsCommand } from "./commands/deployments.js";
 import { envViewCommand } from "./commands/env.js";
 import { homeCommand } from "./commands/home.js";
@@ -14,6 +15,7 @@ import {
   serviceUnpinCommand,
   serviceViewCommand,
 } from "./commands/service.js";
+import { setupCommand } from "./commands/setup.js";
 import type { DokployContext } from "./config.js";
 import { resolveContext } from "./config.js";
 import { AxiError, exitCodeForError } from "./errors.js";
@@ -72,8 +74,8 @@ examples:
   dokploy-axi deployments <NAME>
   dokploy-axi logs <NAME>
   dokploy-axi env view <NAME>
-  dokploy-axi api compose.one --param composeId=<ID>
-  dokploy-axi setup
+  dokploy-axi api compose.one --input '{"composeId":"<ID>"}'
+  dokploy-axi setup --url https://dokploy.example.com --project <NAME>
 `;
 
 const COMMAND_HELP: Record<string, string> = {
@@ -82,8 +84,8 @@ const COMMAND_HELP: Record<string, string> = {
   deployments: "usage: dokploy-axi deployments <NAME>\n",
   logs: "usage: dokploy-axi logs <NAME> [--deployment <ID>] [--tail <N>]\n",
   env: "usage: dokploy-axi env view <NAME>\n",
-  api: "usage: dokploy-axi api <procedure> [--param name=value]\n",
-  setup: "usage: dokploy-axi setup\n",
+  api: "usage: dokploy-axi api <router.procedure> [--input <json>] [--allow-mutation]\n",
+  setup: "usage: dokploy-axi setup [--url <url>] [--project <name>]\n",
 };
 
 type CommandFn = (
@@ -157,8 +159,8 @@ const COMMANDS: Record<string, CommandFn> = {
   env: routed("env", ENV_SUBCOMMANDS, { view: withContext(envViewCommand) }, [
     "`env` is read-only: change variables in the Dokploy UI — saveEnvironment replaces the whole block and drops SHARED_NETWORK",
   ]),
-  api: notImplementedYet("api"),
-  setup: notImplementedYet("setup"),
+  api: withContext(apiCommand),
+  setup: async (args) => setupCommand(args),
 };
 
 export async function main(options: MainOptions = {}): Promise<void> {
