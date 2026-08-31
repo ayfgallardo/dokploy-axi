@@ -1,7 +1,7 @@
 import { encode } from "@toon-format/toon";
 
 /**
- * Field extractor definitions for transforming gh JSON into flat TOON-friendly objects.
+ * Field extractor definitions for transforming Dokploy JSON into flat TOON-friendly objects.
  */
 export type FieldDef =
   | { type: "field"; key: string; as?: string }
