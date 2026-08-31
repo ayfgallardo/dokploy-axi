@@ -1,17 +1,7 @@
-import { takeFlag } from "../args.js";
+import { takeBooleanFlag, takeFlag } from "../args.js";
 import type { DokployContext } from "../config.js";
 import { dokployGet, dokployPost, type DokployParams } from "../dokploy.js";
 import { AxiError } from "../errors.js";
-
-/** Take a value-less flag out of `args`, mutating it in place. */
-function takeBooleanFlag(args: string[], flag: string): boolean {
-  const index = args.indexOf(flag);
-  if (index === -1) {
-    return false;
-  }
-  args.splice(index, 1);
-  return true;
-}
 
 /**
  * Dokploy's tRPC procedures carry no explicit read/write marker, so mutation

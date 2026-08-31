@@ -1,4 +1,4 @@
-import { takeFlag } from "../args.js";
+import { takeBooleanFlag, takeFlag } from "../args.js";
 import type { DokployContext } from "../config.js";
 import { dokployGet, dokployPost } from "../dokploy.js";
 import { AxiError } from "../errors.js";
@@ -147,16 +147,6 @@ export async function serviceViewCommand(
       }),
     ),
   ]);
-}
-
-/** Take a value-less flag out of `args`, mutating it in place. */
-function takeBooleanFlag(args: string[], flag: string): boolean {
-  const index = args.indexOf(flag);
-  if (index === -1) {
-    return false;
-  }
-  args.splice(index, 1);
-  return true;
 }
 
 function requireName(args: string[], usage: string): string {
