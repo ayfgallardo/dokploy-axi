@@ -14,9 +14,21 @@ vi.mock("../src/commands/home.js", () => ({ homeCommand: homeCommandMock }));
 
 const serviceListCommandMock = vi.fn(async () => "service-list-ok");
 const serviceViewCommandMock = vi.fn(async () => "service-view-ok");
+const serviceDeployCommandMock = vi.fn(async () => "service-deploy-ok");
+const serviceRedeployCommandMock = vi.fn(async () => "service-redeploy-ok");
+const serviceStartCommandMock = vi.fn(async () => "service-start-ok");
+const serviceStopCommandMock = vi.fn(async () => "service-stop-ok");
+const servicePinCommandMock = vi.fn(async () => "service-pin-ok");
+const serviceUnpinCommandMock = vi.fn(async () => "service-unpin-ok");
 vi.mock("../src/commands/service.js", () => ({
   serviceListCommand: serviceListCommandMock,
   serviceViewCommand: serviceViewCommandMock,
+  serviceDeployCommand: serviceDeployCommandMock,
+  serviceRedeployCommand: serviceRedeployCommandMock,
+  serviceStartCommand: serviceStartCommandMock,
+  serviceStopCommand: serviceStopCommandMock,
+  servicePinCommand: servicePinCommandMock,
+  serviceUnpinCommand: serviceUnpinCommandMock,
 }));
 
 const deploymentsCommandMock = vi.fn(async () => "deployments-ok");
@@ -154,13 +166,28 @@ describe("stubs", () => {
       expect(await run(argv)).toMatch(/not implemented yet/);
     }
   });
+});
 
-  it("routes each service write subcommand to a not-implemented stub", async () => {
-    for (const sub of ["deploy", "redeploy", "start", "stop", "pin", "unpin"]) {
-      expect(await run(["service", sub, "api-example"])).toMatch(
-        /not implemented yet/,
-      );
-    }
+describe("service mutation wiring", () => {
+  it("routes each write subcommand to its real handler", async () => {
+    expect(await run(["service", "deploy", "api-example"])).toContain(
+      "service-deploy-ok",
+    );
+    expect(await run(["service", "redeploy", "api-example"])).toContain(
+      "service-redeploy-ok",
+    );
+    expect(await run(["service", "start", "api-example"])).toContain(
+      "service-start-ok",
+    );
+    expect(await run(["service", "stop", "api-example"])).toContain(
+      "service-stop-ok",
+    );
+    expect(await run(["service", "pin", "api-example", "feature/x"])).toContain(
+      "service-pin-ok",
+    );
+    expect(await run(["service", "unpin", "api-example"])).toContain(
+      "service-unpin-ok",
+    );
   });
 });
 

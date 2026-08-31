@@ -4,7 +4,16 @@ import { deploymentsCommand } from "./commands/deployments.js";
 import { envViewCommand } from "./commands/env.js";
 import { homeCommand } from "./commands/home.js";
 import { logsCommand } from "./commands/logs.js";
-import { serviceListCommand, serviceViewCommand } from "./commands/service.js";
+import {
+  serviceDeployCommand,
+  serviceListCommand,
+  servicePinCommand,
+  serviceRedeployCommand,
+  serviceStartCommand,
+  serviceStopCommand,
+  serviceUnpinCommand,
+  serviceViewCommand,
+} from "./commands/service.js";
 import type { DokployContext } from "./config.js";
 import { resolveContext } from "./config.js";
 import { AxiError, exitCodeForError } from "./errors.js";
@@ -136,6 +145,12 @@ const COMMANDS: Record<string, CommandFn> = {
   service: routed("service", SERVICE_SUBCOMMANDS, {
     list: withContext(serviceListCommand),
     view: withContext(serviceViewCommand),
+    deploy: withContext(serviceDeployCommand),
+    redeploy: withContext(serviceRedeployCommand),
+    start: withContext(serviceStartCommand),
+    stop: withContext(serviceStopCommand),
+    pin: withContext(servicePinCommand),
+    unpin: withContext(serviceUnpinCommand),
   }),
   deployments: withContext(deploymentsCommand),
   logs: withContext(logsCommand),
