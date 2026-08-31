@@ -1,0 +1,16 @@
+{
+  "composeId": "cmp_worker_1",
+  "name": "worker-example",
+  "appName": "example-project-worker-example-g7h8i9",
+  "sourceType": "gitlab",
+  "gitlabBranch": "main",
+  "gitlabRepository": "worker-example",
+  "gitlabOwner": "example-group",
+  "autoDeploy": true,
+  "triggerType": "push",
+  "watchPaths": ["services/worker-example/**"],
+  "composeStatus": "error",
+  "environmentId": "env_dev",
+  "domains": [],
+  "deployments": []
+}

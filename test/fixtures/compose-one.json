@@ -1,0 +1,16 @@
+{
+  "composeId": "cmp_api_1",
+  "name": "api-example",
+  "appName": "example-project-api-example-a1b2c3",
+  "sourceType": "gitlab",
+  "gitlabBranch": "main",
+  "gitlabRepository": "api-example",
+  "gitlabOwner": "example-group",
+  "autoDeploy": true,
+  "triggerType": "push",
+  "watchPaths": ["services/api-example/**", "common/**", "uv.lock"],
+  "composeStatus": "running",
+  "environmentId": "env_dev",
+  "domains": [],
+  "deployments": []
+}

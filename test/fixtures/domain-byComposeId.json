@@ -1,0 +1,12 @@
+[
+  {
+    "domainId": "dom_1",
+    "host": "api-example.dev.dokploy.example.com",
+    "https": true,
+    "port": 8080,
+    "path": "/",
+    "domainType": "compose",
+    "composeId": "cmp_api_1",
+    "enabled": true
+  }
+]

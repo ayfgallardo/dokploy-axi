@@ -1,0 +1,16 @@
+{
+  "composeId": "cmp_proxy_1",
+  "name": "proxy-example",
+  "appName": "example-project-proxy-example-d4e5f6",
+  "sourceType": "gitlab",
+  "gitlabBranch": "feature/example-branch",
+  "gitlabRepository": "proxy-example",
+  "gitlabOwner": "example-group",
+  "autoDeploy": true,
+  "triggerType": "push",
+  "watchPaths": ["gateway/**"],
+  "composeStatus": "done",
+  "environmentId": "env_dev",
+  "domains": [],
+  "deployments": []
+}

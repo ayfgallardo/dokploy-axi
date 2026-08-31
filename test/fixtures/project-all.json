@@ -1,0 +1,48 @@
+[
+  {
+    "projectId": "prj_1",
+    "name": "example-project",
+    "environments": [
+      {
+        "environmentId": "env_prod",
+        "name": "production",
+        "applications": [],
+        "compose": [
+          {
+            "composeId": "cmp_proxy_prod",
+            "name": "proxy-example",
+            "composeStatus": "done"
+          }
+        ]
+      },
+      {
+        "environmentId": "env_dev",
+        "name": "dev",
+        "applications": [
+          {
+            "applicationId": "app_front_1",
+            "name": "front-example",
+            "applicationStatus": "done"
+          }
+        ],
+        "compose": [
+          {
+            "composeId": "cmp_api_1",
+            "name": "api-example",
+            "composeStatus": "running"
+          },
+          {
+            "composeId": "cmp_worker_1",
+            "name": "worker-example",
+            "composeStatus": "error"
+          },
+          {
+            "composeId": "cmp_proxy_1",
+            "name": "proxy-example",
+            "composeStatus": "done"
+          }
+        ]
+      }
+    ]
+  }
+]
