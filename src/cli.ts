@@ -3,6 +3,7 @@ import { runAxiCli } from "axi-sdk-js";
 import { apiCommand } from "./commands/api.js";
 import { deploymentsCommand } from "./commands/deployments.js";
 import { envViewCommand } from "./commands/env.js";
+import { gainCommand } from "./commands/gain.js";
 import { homeCommand } from "./commands/home.js";
 import { logsCommand } from "./commands/logs.js";
 import {
@@ -19,6 +20,7 @@ import { setupCommand } from "./commands/setup.js";
 import type { DokployContext } from "./config.js";
 import { resolveContext } from "./config.js";
 import { AxiError, exitCodeForError } from "./errors.js";
+import { flushGain, gainCommandName, gainStdout, startGain } from "./gain.js";
 import { VERSION } from "./version.js";
 
 export const DESCRIPTION =
@@ -38,6 +40,7 @@ export const COMMAND_NAMES = [
   "logs",
   "env",
   "api",
+  "gain",
   "setup",
 ] as const;
 
@@ -75,6 +78,7 @@ examples:
   dokploy-axi logs <NAME>
   dokploy-axi env view <NAME>
   dokploy-axi api compose.one --input '{"composeId":"<ID>"}'
+  dokploy-axi gain
   dokploy-axi setup --url https://dokploy.example.com --project <NAME>
 `;
 
@@ -85,6 +89,7 @@ const COMMAND_HELP: Record<string, string> = {
   logs: "usage: dokploy-axi logs <NAME> [--deployment <ID>] [--tail <N>]\n",
   env: "usage: dokploy-axi env view <NAME>\n",
   api: "usage: dokploy-axi api <router.procedure> [--input <json>] [--allow-mutation]\n",
+  gain: "usage: dokploy-axi gain\n",
   setup: "usage: dokploy-axi setup [--url <url>] [--project <name>]\n",
 };
 
@@ -148,16 +153,22 @@ const COMMANDS: Record<string, CommandFn> = {
     "`env` is read-only: change variables in the Dokploy UI — saveEnvironment replaces the whole block and drops SHARED_NETWORK",
   ]),
   api: withContext(apiCommand),
+  gain: async () => gainCommand(),
   setup: async (args) => setupCommand(args),
 };
 
+/** Commands that talk to no server, so they need no resolved context. */
+const LOCAL_COMMANDS = ["gain", "setup"];
+
 export async function main(options: MainOptions = {}): Promise<void> {
+  const argv = options.argv ?? process.argv.slice(2);
+  startGain();
   await runAxiCli<DokployContext | undefined>({
-    ...(options.argv ? { argv: options.argv } : {}),
+    argv,
     description: DESCRIPTION,
     version: VERSION,
     topLevelHelp: TOP_HELP,
-    ...(options.stdout ? { stdout: options.stdout } : {}),
+    stdout: gainStdout(options.stdout ?? process.stdout),
     home: wrappedHome,
     commands: COMMANDS,
     getCommandHelp: (command) => COMMAND_HELP[command],
@@ -180,8 +191,18 @@ export async function main(options: MainOptions = {}): Promise<void> {
         exitCode: exitCodeForError(axiError),
       };
     },
-    // `setup` writes the very configuration the other commands read.
+    // `setup` writes the very configuration the other commands read; `gain`
+    // reads a local log and talks to no server.
     resolveContext: async ({ command }) =>
-      command === "setup" ? undefined : resolveContext(),
+      command !== undefined && LOCAL_COMMANDS.includes(command)
+        ? undefined
+        : resolveContext(),
   });
+
+  await flushGain(
+    gainCommandName(argv, COMMAND_NAMES, {
+      service: SERVICE_SUBCOMMANDS,
+      env: ENV_SUBCOMMANDS,
+    }),
+  );
 }

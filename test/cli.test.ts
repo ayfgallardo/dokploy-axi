@@ -47,6 +47,9 @@ vi.mock("../src/commands/env.js", () => ({
 const apiCommandMock = vi.fn(async () => "api-ok");
 vi.mock("../src/commands/api.js", () => ({ apiCommand: apiCommandMock }));
 
+const gainCommandMock = vi.fn(async () => "gain-ok");
+vi.mock("../src/commands/gain.js", () => ({ gainCommand: gainCommandMock }));
+
 const setupCommandMock = vi.fn(async () => "setup-ok");
 vi.mock("../src/commands/setup.js", () => ({
   setupCommand: setupCommandMock,
@@ -81,6 +84,7 @@ describe("cli surface", () => {
       "logs",
       "env",
       "api",
+      "gain",
       "setup",
     ]);
   });
@@ -160,6 +164,7 @@ describe("cli surface", () => {
     expect(await run(["logs", "api-example"])).toContain("logs-ok");
     expect(await run(["env", "view", "api-example"])).toContain("env-view-ok");
     expect(await run(["api", "project.all"])).toContain("api-ok");
+    expect(await run(["gain"])).toContain("gain-ok");
     expect(await run(["setup"])).toContain("setup-ok");
 
     expect(serviceListCommandMock).toHaveBeenCalledTimes(1);
@@ -168,6 +173,7 @@ describe("cli surface", () => {
     expect(logsCommandMock).toHaveBeenCalledTimes(1);
     expect(envViewCommandMock).toHaveBeenCalledTimes(1);
     expect(apiCommandMock).toHaveBeenCalledTimes(1);
+    expect(gainCommandMock).toHaveBeenCalledTimes(1);
     expect(setupCommandMock).toHaveBeenCalledTimes(1);
   });
 });

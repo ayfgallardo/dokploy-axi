@@ -1,5 +1,6 @@
 import type { DokployContext } from "./config.js";
 import { mapDokployError, mapNetworkError } from "./errors.js";
+import { recordRawBody } from "./gain.js";
 
 export type DokployParams = Record<
   string,
@@ -89,7 +90,7 @@ function trpcPost(
 async function send(
   ctx: DokployContext,
   attempt: Attempt,
-): Promise<{ status: number; body: unknown }> {
+): Promise<{ status: number; body: unknown; text: string }> {
   let response: Response;
   try {
     response = await fetch(attempt.url, attempt.init);
@@ -106,7 +107,7 @@ async function send(
       body = text;
     }
   }
-  return { status: response.status, body };
+  return { status: response.status, body, text };
 }
 
 /** tRPC wraps its payload in `result.data`, itself superjson-wrapped in `json`. */
@@ -125,6 +126,12 @@ function unwrapTrpc(body: unknown): unknown {
 /**
  * dokploy#3793: the OpenAPI facade answers 500 on payloads the tRPC engine
  * serves fine, so a 500 is retried there before it is called an error.
+ *
+ * Only the body this function keeps is fed to the recorder — the 500 a retry
+ * answers is an internal round-trip the agent never reads. Counting happens
+ * here rather than in `send()` because up to ~46 requests of one invocation
+ * run concurrently (`home` fans out over every service), so nothing may depend
+ * on the order in which their bodies came back.
  */
 async function request<T>(
   ctx: DokployContext,
@@ -134,13 +141,16 @@ async function request<T>(
 ): Promise<T> {
   const first = await send(ctx, openApi);
   if (first.status < 400) {
+    recordRawBody(first.text);
     return first.body as T;
   }
   if (first.status !== 500) {
+    recordRawBody(first.text);
     throw mapDokployError(first.status, first.body, procedure);
   }
 
   const fallback = await send(ctx, trpc);
+  recordRawBody(fallback.text);
   if (fallback.status >= 400) {
     throw mapDokployError(fallback.status, fallback.body, procedure);
   }

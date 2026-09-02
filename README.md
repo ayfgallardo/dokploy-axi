@@ -51,6 +51,7 @@ This writes `~/.config/dokploy-axi/config.json` (server URL and project name onl
 | `dokploy-axi logs <NAME> [--deployment <ID>] [--tail <N>]`               | Build/deployment logs (not application runtime logs — see traps below).        |
 | `dokploy-axi env view <NAME>`                                            | Rendered environment, read-only.                                               |
 | `dokploy-axi api <router.procedure> [--input <json>] [--allow-mutation]` | Raw Dokploy API call, same AXI conventions. Mutation refused without the flag. |
+| `dokploy-axi gain`                                                       | Token savings recorded by this CLI: totals and per-command breakdown.          |
 | `dokploy-axi setup [--url <url>] [--project <name>]`                     | Configure or inspect the local url/project setup.                              |
 
 Run `dokploy-axi --help` or `dokploy-axi <command> --help` for exact flags.
@@ -68,6 +69,39 @@ Behaviors that don't show up from the command names alone:
 7. **`pin` suggests its `unpin`.** After pinning a branch, the CLI always surfaces the return-to-`main` command in its help block.
 
 A raw `403` from the API means Traefik IP filtering on the target server, not a bad key — the error message says so explicitly.
+
+## Recorded savings
+
+Every invocation that issued at least one request appends one line to
+`~/Library/Application Support/axi/dokploy-axi.jsonl` (XDG data directory elsewhere):
+
+```json
+{
+  "ts": 1788311753,
+  "cli": "dokploy-axi",
+  "cmd": "service view",
+  "raw": 10021,
+  "out": 95,
+  "ms": 227
+}
+```
+
+`raw` is the token count of the JSON of every HTTP response the invocation actually used —
+what an agent would have ingested calling the API itself — and `out` the token count of the
+rendered output. `dokploy-axi gain` reports the accumulated totals.
+
+- **Only names the CLI itself defines are recorded.** Never arguments, flag values, service
+  names, ids, URLs or payload fragments; the log holds integers and command names, both
+  tokens of a `service view` style name coming from closed lists.
+- **A response that only triggers a retry is not counted.** The OpenAPI 500 answered by the
+  tRPC fallback (trap 5) is an internal round-trip the agent never reads. A failure with no
+  retry behind it stays counted.
+- `AXI_GAIN=0` disables recording entirely.
+- Recording can never fail a command, and never delays its output: the tokenizer is imported
+  after stdout is written, which costs ~55 ms before the process exits.
+- The counts run higher than the [benchmark](#benchmark) below: the benchmark compares a
+  single API call per command, while the recorder counts every response an invocation
+  actually made — `home` fans out across 23 services.
 
 ## Benchmark
 
