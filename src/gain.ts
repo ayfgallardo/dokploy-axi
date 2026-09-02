@@ -53,20 +53,14 @@ export function startGain(): void {
   startedAt = Date.now();
 }
 
-/** Response body as an agent would have read it — decompressed, before parsing. */
+/**
+ * Response body as an agent would have read it — decompressed, before parsing.
+ * Called only for a body the transport keeps, never for one a retry replaces.
+ */
 export function recordRawBody(text: string): void {
   if (enabled()) {
     rawBodies.push(text);
   }
-}
-
-/**
- * Forget the body just recorded: a failure the caller answers with a retry is
- * an internal round-trip the agent never reads, so counting it inflates `raw`.
- * A failure with no retry behind it stays counted — the agent would have read it.
- */
-export function dropRetriedRawBody(): void {
-  rawBodies.pop();
 }
 
 /** Tee the rendered output so it can be counted once the process is done writing. */

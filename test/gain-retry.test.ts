@@ -10,6 +10,7 @@ vi.mock("node:os", async () => {
   return { ...actual, homedir: () => home.value };
 });
 
+const { countTokens } = await import("gpt-tokenizer/model/gpt-4o");
 const { flushGain, readGainLog, startGain } = await import("../src/gain.js");
 const { dokployGet } = await import("../src/dokploy.js");
 
@@ -72,6 +73,45 @@ describe("gain accounting across the tRPC fallback", () => {
     const [afterRetry, straightThrough] = readGainLog();
     expect(fetchMock).toHaveBeenCalledTimes(3);
     expect(afterRetry.raw).toBe(straightThrough.raw);
+  });
+
+  it("counts the retained bodies of concurrent requests, not the retried one", async () => {
+    // `home` fans out over every service, so a 500 answered by the fallback and
+    // a plain 200 are in flight at the same time: the recorder must not depend
+    // on the order the bodies come back in.
+    const failing = JSON.stringify({ message: "Internal server error" });
+    const succeeding = JSON.stringify({
+      composes: Array.from({ length: 40 }, (_, index) => ({
+        composeId: `id-${index}`,
+        name: `service-${index}`,
+        branch: "main",
+      })),
+    });
+    const fallback = JSON.stringify({ result: { data: PAYLOAD } });
+    fetchMock.mockImplementation((url: string) => {
+      if (url.includes("/api/trpc/")) {
+        return Promise.resolve(jsonResponse(200, fallback));
+      }
+      return Promise.resolve(
+        url.includes("retried")
+          ? jsonResponse(500, failing)
+          : jsonResponse(200, succeeding),
+      );
+    });
+
+    startGain();
+    await Promise.all([
+      dokployGet(CTX, "compose.one", { composeId: "retried" }),
+      dokployGet(CTX, "compose.one", { composeId: "served" }),
+    ]);
+    await flushGain("home");
+
+    // Either interleaving of the two retained bodies is correct; the point is
+    // that both are counted and the retried 500 body is not.
+    expect([
+      countTokens(succeeding + fallback),
+      countTokens(fallback + succeeding),
+    ]).toContain(readGainLog()[0].raw);
   });
 
   it("still counts an error body that no retry follows", async () => {
