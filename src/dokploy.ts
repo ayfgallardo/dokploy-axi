@@ -1,5 +1,6 @@
 import type { DokployContext } from "./config.js";
 import { mapDokployError, mapNetworkError } from "./errors.js";
+import { dropRetriedRawBody, recordRawBody } from "./gain.js";
 
 export type DokployParams = Record<
   string,
@@ -98,6 +99,7 @@ async function send(
   }
 
   const text = await response.text();
+  recordRawBody(text);
   let body: unknown;
   if (text.trim() !== "") {
     try {
@@ -140,6 +142,8 @@ async function request<T>(
     throw mapDokployError(first.status, first.body, procedure);
   }
 
+  // The rejected 500 body is an internal round-trip the agent never reads.
+  dropRetriedRawBody();
   const fallback = await send(ctx, trpc);
   if (fallback.status >= 400) {
     throw mapDokployError(fallback.status, fallback.body, procedure);

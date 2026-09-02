@@ -40,7 +40,6 @@
     "@eslint/js": "^10.0.1",
     "@types/node": "^22.0.0",
     "eslint": "^10.1.0",
-    "gpt-tokenizer": "^4.0.0",
     "globals": "^17.4.0",
     "prettier": "^3.8.1",
     "tsx": "^4.0.0",
@@ -50,6 +49,7 @@
   },
   "dependencies": {
     "@toon-format/toon": "^4.1.1",
-    "axi-sdk-js": "^0.1.11"
+    "axi-sdk-js": "^0.1.11",
+    "gpt-tokenizer": "^4.0.0"
   }
 }
